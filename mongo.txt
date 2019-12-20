@@ -1,0 +1,187 @@
+$ mongod -> start server mongo
+$ mongo -> start client mongo
+
+
+> db.version()
+3.4.16
+
+> show dbs
+admin   0.000GB
+local   0.000GB
+prueba  0.000GB
+
+> use udemyDb
+switched to db udemyDb
+
+> show dbs
+admin   0.000GB
+local   0.000GB
+prueba  0.000GB
+
+> db.dropDatabase()
+{ "ok" : 1 }
+
+> use udemyDb
+switched to db udemyDb
+
+> db
+udemyDb
+
+> db.createCollection("profesor")
+{ "ok" : 1 }
+
+> db.createCollection('course')
+{ "ok" : 1 }
+
+> show dbs
+admin    0.000GB
+local    0.000GB
+prueba   0.000GB
+udemyDb  0.000GB
+
+> show collections
+course
+profesor
+
+> db.profesor.insert({
+    "name": "Alberto",
+    "courses": 4,
+    "country": null,
+    "lenguajes": ["Java", "Kotlin", "Swift"],
+    "Address": {
+        "street": "Av. Paseo de la Reforma",
+        "number": "14"
+    }
+})
+
+> db.profesor.insert({
+    "name": "Carmen",
+    "courses": 5,
+    "country": "México",
+    "lenguajes": ["Python", "Ruby", "PHP"],
+    "Address": {
+        "street": "Av. Paseo de la Reforma",
+        "number": "296"
+    }
+})
+
+>db.course.insertMany([
+    {
+        "name": "Course MongoDb",
+        "duration": 300,
+        "students": 100,
+        "start_date": "2020"
+    },
+    {
+        "name": "Course NodeJs",
+        "duration": 300,
+        "students": 250,
+        "start_date": "2020"
+    },
+    {
+        "name": "Course Python",
+        "duration": 500,
+        "students": 50,
+        "start_date": "2020"
+    }
+])
+
+{
+        "acknowledged" : true,
+        "insertedIds" : [
+                ObjectId("5dfbc9ae82de09c65de3622e"),
+                ObjectId("5dfbc9ae82de09c65de3622f"),
+                ObjectId("5dfbc9ae82de09c65de36230")
+        ]
+}
+
+
+ObjectId
+
+12 byte ObjectId("5dfbc9ae82de09c65de3622e")
+
+4 -> Tiempo en Unix - Fecha
+3 -> Identificador de la maquina que los crea
+2 -> id del Proceso - PID
+3 -> Contador empieza con valor aleatorio - Contador
+
+
+> db.professor.drop() --> Borrar una collection
+> db.getCollection("profesor").drop() otra forma de borrar collections
+
+> db.profesor.insert({
+    objeto / array
+})
+
+> db.profesor.insertOne({
+    ...object
+})
+
+> db.profesor.insertMany([
+    ... OBJECTS
+])
+
+> db.profesor.remove({}) -->borra todos los documentos de la collection
+
+> db.profesor.find() -> obtiene todos los documentos de una collection
+
+
+BSON Types
+
+> db.profesor.insertOne({
+    "Double": 10,
+    "String": "Alberto",
+    "Boolean": true,
+    "Date": new Date(),
+    "null": null,
+    "NumberInt": NumberInt(100),
+    "NumberLong": NumberLong(1233456432),
+    "object": {
+        "Double": 12,
+        "String": "Carmen"
+    },
+    "Array": [1,2,3]
+})
+
+
+
+
+/////////////////////////////////
+            GRAPHGQL
+/////////////////////////////////
+
+--------- Mutations----------------
+
+mutation{
+  updateCourse(id:"5dfbdd125a106a3fecbe97d8",
+  	name: "Machine Learning with python",
+    language: "Python",
+    date: "2020",
+    professorId: "5dfbdff9eca6d743b3c93770"
+  ){
+    name
+    language
+    professor{
+      name
+    }
+  }
+}
+
+mutation{
+  deleteCourse(id:"5dfbdbdbf49b7c3d1547df32"){
+    name
+    language
+    id
+  }
+}
+
+----------Querys------------------------
+
+{
+    courses{
+        name
+        ...
+        ...
+    }
+}
+
