@@ -1,15 +1,11 @@
 const graphql = require('graphql')
 const Course = require('../models/course')
 const Professor = require('../models/professor')
+const User = require('../models/user')
+const bcrypt = require('bcrypt')
+const auth = require('../utils/auth')
 
 const {GraphQLObjectType, GraphQLID, GraphQLInt, GraphQLBoolean, GraphQLString, GraphQLList, GraphQLSchema} = graphql
-
-var users = [
-    {id: '1', name: 'Fernanda', email:'fer@gmail.com', password: '123', date: '2020'},
-    {id: '2', name: 'Victor', email:'vic@gmail.com', password: '123', date: '2021'},
-    {id: '3', name: 'Abril', email:'abril@gmail.com', password: '123', date: '2020'},
-    {id: '4', name: 'Abraham', email:'abraham@gmail.com', password: '123', date: '2020'},
-]
 
 const CourseType = new GraphQLObjectType({
     name: 'Course',
@@ -52,6 +48,15 @@ const UserType =  new GraphQLObjectType({
         email: {type: GraphQLString},
         password: {type: GraphQLString},
         date: {type: GraphQLString}
+    })
+})
+
+const MessageType = new GraphQLObjectType({
+    name: 'Message',
+    fields: () => ({
+        message: {type: GraphQLString},
+        token: {type: GraphQLString},
+        error: {type: GraphQLString}
     })
 })
 
@@ -213,7 +218,46 @@ const Mutation = new GraphQLObjectType({
             resolve(parent, args){
                 return Professor.deleteMany({})
             }
-        }
+        },
+
+        addUser: {
+            type: MessageType,
+            args: {
+                name: {type: GraphQLString},
+                email: {type: GraphQLString},
+                password: {type: GraphQLString},
+                date: {type: GraphQLString}
+            },
+            async resolve(parent, args){
+                let user = await User.findOne({email: args.email})
+                if(user) return {error: 'Ya existe un usuario con el correo'}
+                const salt = await bcrypt.genSalt(10)
+                const hashPassword = await bcrypt.hash(args.password, salt)
+                user = new User({
+                    name: args.name,
+                    email: args.email,
+                    date: args.date,
+                    password:  hashPassword
+                })
+                user.save()
+                return{ message: 'Usuario registrado correctamente'}
+            }
+        },
+
+        login: {
+            type: MessageType,
+            args: {
+                email: {type: GraphQLString},
+                password: {type: GraphQLString}
+            },
+            async resolve(parent, args){
+                const result =  await auth.login(args.email, args.password, '12231')
+                return {
+                    message: result.message,
+                    error: result.error
+                }
+            }
+        },
     }
 })
 
